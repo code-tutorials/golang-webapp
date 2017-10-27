@@ -1,8 +1,11 @@
 <html>
 	<head>
-		<title>Super awesome amazing page</title>
+		<title>Comments</title>
 	</head>
 	<body>
-		<h1>Some basic HTML code</h1>
+		<h1>Comments</h1>
+		{{ range . }}
+		<div>{{ . }}</div>
+		{{ end }}
 	</body>
 </html>
