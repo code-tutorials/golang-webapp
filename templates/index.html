@@ -4,6 +4,12 @@
 	</head>
 	<body>
 		<h1>Comments</h1>
+		<form method="POST">
+			<textarea name="comment"></textarea>
+			<div>
+				<button type="submit">Post Comment</button>
+			</div>
+		</form>
 		{{ range . }}
 		<div>{{ . }}</div>
 		{{ end }}
