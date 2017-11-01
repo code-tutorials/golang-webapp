@@ -1,0 +1,7 @@
+body > div {
+    padding: 0.5em;
+    width: 200px;
+    margin: 1em 0em;
+    background: #ccc;
+    border: 1px solid #aaa;
+}
