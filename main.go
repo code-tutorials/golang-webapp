@@ -40,6 +40,8 @@ func indexGetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	comments, err := client.LRange("comments", 0, 10).Result()
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
 		return
 	}
 	templates.ExecuteTemplate(w, "index.html", comments)
@@ -48,7 +50,12 @@ func indexGetHandler(w http.ResponseWriter, r *http.Request) {
 func indexPostHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	comment := r.PostForm.Get("comment")
-	client.LPush("comments", comment)
+	err := client.LPush("comments", comment).Err()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
+		return
+	}
 	http.Redirect(w, r, "/", 302)
 }
 
@@ -61,11 +68,17 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.PostForm.Get("username")
 	password := r.PostForm.Get("password")
 	hash, err := client.Get("user:" + username).Bytes()
-	if err != nil {
+	if err == redis.Nil {
+		templates.ExecuteTemplate(w, "login.html", "unknown user")
+		return
+	} else if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
 		return
 	}
 	err = bcrypt.CompareHashAndPassword(hash, []byte(password))
 	if err != nil {
+		templates.ExecuteTemplate(w, "login.html", "invalid login")
 		return
 	}
 	session, _ := store.Get(r, "session")
@@ -85,8 +98,15 @@ func registerPostHandler(w http.ResponseWriter, r *http.Request) {
 	cost := bcrypt.DefaultCost
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), cost)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
 		return
 	}
-	client.Set("user:" + username, hash, 0)
+	err = client.Set("user:" + username, hash, 0).Err()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
+		return
+	}
 	http.Redirect(w, r, "/login", 302)
 }
