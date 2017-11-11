@@ -19,17 +19,25 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/register", registerPostHandler).Methods("POST")
 	fs := http.FileServer(http.Dir("./static/"))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
+	r.HandleFunc("/{username}",
+		middleware.AuthRequired(userGetHandler)).Methods("GET")
 	return r
 }
 
 func indexGetHandler(w http.ResponseWriter, r *http.Request) {
-	updates, err := models.GetUpdates()
+	updates, err := models.GetAllUpdates()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
-	utils.ExecuteTemplate(w, "index.html", updates)
+	utils.ExecuteTemplate(w, "index.html", struct {
+		Title string
+		Updates []*models.Update
+	} {
+		Title: "All updates",
+		Updates: updates,
+	})
 }
 
 func indexPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,6 +58,36 @@ func indexPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/", 302)
+}
+
+func userGetHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	username := vars["username"]
+	user, err := models.GetUserByUsername(username)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
+		return
+	}
+	userId, err := user.GetId()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
+		return
+	}
+	updates, err := models.GetUpdates(userId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal server error"))
+		return
+	}
+	utils.ExecuteTemplate(w, "index.html", struct {
+		Title string
+		Updates []*models.Update
+	} {
+		Title: username,
+		Updates: updates,
+	})
 }
 
 func loginGetHandler(w http.ResponseWriter, r *http.Request) {
