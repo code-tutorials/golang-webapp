@@ -1,7 +1,38 @@
-body > div {
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #f0f0f0;
+}
+
+nav {
     padding: 0.5em;
-    width: 200px;
-    margin: 1em 0em;
-    background: #ccc;
+    background: #fff;
+    border-bottom: 1px solid #aaa;
+    text-align: right;
+}
+
+main {
+    margin: 0 auto;
+    max-width: 640px;
+}
+
+main > .update {
+    padding: 0.5em;
+    background: #fff;
     border: 1px solid #aaa;
+    margin-bottom: 1em;
+}
+
+#update-form {
+    text-align: right;
+    margin-bottom: 1em;
+}
+
+#update-form textarea {
+    width: 100%;
+    margin-bottom: 0.5em;
+    resize: vertical;
 }

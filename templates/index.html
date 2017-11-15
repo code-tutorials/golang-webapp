@@ -4,20 +4,29 @@
 		<link rel="stylesheet" type="text/css" href="/static/index.css">
 	</head>
 	<body>
-		<h1>{{ .Title }}</h1>
-		<form method="POST">
-			<textarea name="update"></textarea>
-			<div>
-				<button type="submit">Post Update</button>
+		<nav>
+			<a href="/logout">logout</a>
+		</nav>
+		<main>
+			<h1>{{ .Title }}</h1>
+			{{ if .DisplayForm }}
+			<div id="update-form">
+				<form action="/" method="POST">
+					<textarea name="update"></textarea>
+					<div>
+						<button type="submit">Post Update</button>
+					</div>
+				</form>
 			</div>
-		</form>
-		{{ range .Updates }}
-		<div>
-			<div>
-				<strong>{{ .GetUser.GetUsername }} wrote:</strong>
+			{{ end }}
+			{{ range .Updates }}
+			<div class="update">
+				<div>
+					<strong><a href="/{{ .GetUser.GetUsername }}">{{ .GetUser.GetUsername }}</a> wrote:</strong>
+				</div>
+				<div>{{ .GetBody }}</div>
 			</div>
-			<div>{{ .GetBody }}</div>
-		</div>
-		{{ end }}
+			{{ end }}
+		</main>
 	</body>
 </html>
